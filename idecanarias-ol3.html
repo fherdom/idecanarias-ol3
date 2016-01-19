@@ -35,28 +35,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         map: null,
 
-        created: function() {
-            console.debug(this.localName + ' created');
-        },
-
         attached: function() {
-            console.debug('attached');
             this.async(function() {
-                console.debug('async');
                 this.initialConfig();
             });
         },
 
-        detached: function() {
-            console.debug('detached');
-        },
-
-        ready: function(){
-            console.debug('ready');
-        },
-
         initialConfig: function(){
-            console.debug('initialConfig');
             proj4.defs("EPSG:32628","+proj=utm +zone=28 +datum=WGS84 +units=m +no_defs");
             this.map = new ol.Map({
                 target: this.$.map,
