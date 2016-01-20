@@ -8,6 +8,10 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+<link rel="import" href="../paper-material/paper-material.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-button/paper-button.html">
 
 <dom-module id="idecanarias-ol3">
     <script src="//cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.3/proj4.js"></script>
@@ -25,6 +29,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
         </style>
         <div id="map"></div>
+
+        <iron-ajax
+            id="ajax"
+            handle-as="xml"
+            on-response="handleResponse"
+            last-response="{{ xmldata }}">
+        </iron-ajax>
+
+        <paper-material>
+            <paper-input is="iron-input" bind-value="{{ texto }}"></paper-input>
+            <paper-button on-click="setajax">Click me</paper-button>
+        </paper-material>
+
+        <template is="dom-repeat" items="{{ xmldata | nodeList('row') }}">
+            <div><span>{{ item | nodeText('nombre') }}</span></div>
+        </template>
+
+        <p>[[ xmldata ]]</p>
+
     </template>
 </dom-module>
 
@@ -39,6 +62,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.async(function() {
                 this.initialConfig();
             });
+        },
+
+        ready: function() {
+            console.debug('ready');
+        },
+
+        setajax: function() {
+            var texto = document.querySelector("input[is=iron-input]").value;
+            this.$.ajax.url = "http://visor.grafcan.es/busquedas/toponimoxml/1/10/";
+            this.$.ajax.params = {"texto": texto};
+            if (texto) {
+                this.$.ajax.generateRequest();
+            }
         },
 
         initialConfig: function(){
@@ -75,5 +111,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 })
             });
         },
+
+        handleResponse: function(data) {
+            var x, i, xmlDoc;
+            if (data) {
+                xmlDoc = data.detail.response;
+                x = xmlDoc.getElementsByTagName("row");
+                for (i = 0; i < x.length; i++) {
+                    console.debug(x[i].getElementsByTagName("nombre")[0].childNodes[0].nodeValue);
+                }
+                //console.debug(data.detail.response);
+                //console.debug(xmlDoc.getElementsByTagName("rows"));
+            }
+        },
+
+        nodeList: function(element, name) {
+            return element ? [].slice.call(element.querySelectorAll(name)) : []
+        },
+
+        nodeText: function(element, name) {
+            return element.querySelector(name).innerHTML;
+        }
+
     });
 </script>
