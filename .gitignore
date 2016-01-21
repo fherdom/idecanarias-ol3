@@ -5,3 +5,6 @@ leeme.txt
 .idea
 binaries
 node_modules
+*-project
+*-workspace
+

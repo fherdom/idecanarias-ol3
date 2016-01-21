@@ -7,11 +7,15 @@ The complete set of contributors may be found at http://polymer.github.io/CONTRI
 Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
-<link rel="import" href="../polymer/polymer.html">
+<!-- Iron elements -->
 <link rel="import" href="../iron-ajax/iron-ajax.html">
+
+<!-- Paper elements -->
 <link rel="import" href="../paper-material/paper-material.html">
 <link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-toast/paper-toast.html">
+<link rel="import" href="../paper-card/paper-card.html">
 
 <dom-module id="idecanarias-ol3">
     <script src="//cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.3/proj4.js"></script>
@@ -22,13 +26,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             :host {
                 display: block;
                 position: relative;
+                font-family: 'Roboto', sans-serif;
             }
             #map {
                 height: 100%;
                 width: 100%;
             }
+            #cards {
+                max-width: 250px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            paper-card {
+                --paper-card-header: {
+                    @apply(--layout-vertical);
+                    @apply(--layout-center);
+                };
+                width: 100%;
+                margin-bottom: 16px;
+            }
+            .pink {
+                --paper-card-header-color: var(--paper-pink-500);
+            }
         </style>
-        <div id="map"></div>
+
+        <paper-material elevation="1">
+            <div id="map"></div>
+        </paper-material>
 
         <iron-ajax
             id="ajax"
@@ -38,15 +62,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </iron-ajax>
 
         <paper-material>
-            <paper-input is="iron-input" bind-value="{{ texto }}"></paper-input>
-            <paper-button on-click="setajax">Click me</paper-button>
+            <paper-input
+                is="iron-input"
+                id="btnSearch"
+                value="agua"
+                bind-value="{{ texto }}"></paper-input>
+            <paper-button on-click="doSearch">Buscar</paper-button>
         </paper-material>
 
-        <template is="dom-repeat" items="{{ xmldata | nodeList('row') }}">
-            <div><span>{{ item | nodeText('nombre') }}</span></div>
-        </template>
+        <paper-material>
+            <div id="cards">
+                <template is="dom-repeat" items="{{ nodeList(xmldata, 'row') }}">
+                    <paper-card heading="{{ nodeText(item, 'nombre') }}" class="pink">
+                        <div class="card-content">{{ nodeText(item, 'localizacion') }}{{ nodeText(item, 'clasificacion') }}</div>
+                        <div class="card-actions">
+                            <paper-button>Ir</paper-button>
+                        </div>
+                    </paper-card>
+                </template>
+            </div>
+        </paper-material>
 
-        <p>[[ xmldata ]]</p>
+        <paper-toast id="toast" text="Hello world!"></paper-toast>
 
     </template>
 </dom-module>
@@ -55,6 +92,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     Polymer(
       {
         is: "idecanarias-ol3",
+
+        properties: {
+            name: {
+                type: String,
+                value: 'Toponimos',
+                notify: true
+            }
+        },
 
         map: null,
 
@@ -68,8 +113,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             console.debug('ready');
         },
 
-        setajax: function() {
-            var texto = document.querySelector("input[is=iron-input]").value;
+        doSearch: function() {
+            var texto = this.$.btnSearch.value;
             this.$.ajax.url = "http://visor.grafcan.es/busquedas/toponimoxml/1/10/";
             this.$.ajax.params = {"texto": texto};
             if (texto) {
@@ -113,24 +158,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
         handleResponse: function(data) {
-            var x, i, xmlDoc;
-            if (data) {
-                xmlDoc = data.detail.response;
-                x = xmlDoc.getElementsByTagName("row");
-                for (i = 0; i < x.length; i++) {
-                    console.debug(x[i].getElementsByTagName("nombre")[0].childNodes[0].nodeValue);
-                }
-                //console.debug(data.detail.response);
-                //console.debug(xmlDoc.getElementsByTagName("rows"));
-            }
+            var response = data.detail.response;
+            list = response.querySelectorAll('row');
+            console.log(list);
+            this.$.toast.text = 'Consulta realizada';
+            this.$.toast.open();
         },
 
         nodeList: function(element, name) {
-            return element ? [].slice.call(element.querySelectorAll(name)) : []
+            return element ? Array.prototype.slice.call(element.querySelectorAll(name)) : []
         },
 
         nodeText: function(element, name) {
-            return element.querySelector(name).innerHTML;
+            return element.querySelector(name).textContent;
         }
 
     });
