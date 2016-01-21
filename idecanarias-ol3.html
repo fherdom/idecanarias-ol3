@@ -6,6 +6,10 @@ The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
 The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
 Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+
+Tutorials:
+- 160121: https://www.youtube.com/watch?v=3LDyyTre4UA#t=163.837595
+
 -->
 <!-- Iron elements -->
 <link rel="import" href="../iron-ajax/iron-ajax.html">
@@ -32,21 +36,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 height: 100%;
                 width: 100%;
             }
-            #cards {
-                max-width: 250px;
-                margin-left: auto;
-                margin-right: auto;
-            }
             paper-card {
                 --paper-card-header: {
                     @apply(--layout-vertical);
                     @apply(--layout-center);
                 };
-                width: 100%;
+                width: 250px;
                 margin-bottom: 16px;
             }
             .pink {
                 --paper-card-header-color: var(--paper-pink-500);
+            }
+            paper-button.fancy {
+              background: blue;
+              color: white;
+            }
+
+            paper-button[disabled],
+            paper-button[toggles][active] {
+              background: red;
             }
         </style>
 
@@ -61,27 +69,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             last-response="{{ xmldata }}">
         </iron-ajax>
 
-        <paper-material>
-            <paper-input
-                is="iron-input"
-                id="btnSearch"
-                value="agua"
-                bind-value="{{ texto }}"></paper-input>
-            <paper-button on-click="doSearch">Buscar</paper-button>
-        </paper-material>
+        <paper-input
+            is="iron-input"
+            id="btnSearch"
+            value="agua"
+            bind-value="{{ texto }}"></paper-input>
+        <paper-button on-click="doSearch" class="fancy">Buscar</paper-button>
 
-        <paper-material>
-            <div id="cards">
-                <template is="dom-repeat" items="{{ nodeList(xmldata, 'row') }}">
-                    <paper-card heading="{{ nodeText(item, 'nombre') }}" class="pink">
-                        <div class="card-content">{{ nodeText(item, 'localizacion') }}{{ nodeText(item, 'clasificacion') }}</div>
-                        <div class="card-actions">
-                            <paper-button>Ir</paper-button>
-                        </div>
-                    </paper-card>
-                </template>
-            </div>
-        </paper-material>
+        <br/>
+
+        <section class="flex layout vertical">
+            <template is="dom-repeat" items="{{ nodeList(xmldata, 'row') }}">
+                <paper-card heading="{{ nodeText(item, 'nombre') }}" class="pink">
+                    <div class="card-content">{{ nodeText(item, 'localizacion') }}{{ nodeText(item, 'clasificacion') }}</div>
+                    <div class="card-actions">
+                        <paper-button>Ir</paper-button>
+                    </div>
+                </paper-card>
+            </template>
+        </section>
 
         <paper-toast id="toast" text="Hello world!"></paper-toast>
 
