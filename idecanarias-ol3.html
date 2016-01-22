@@ -20,12 +20,14 @@ Tutorials:
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-toast/paper-toast.html">
 <link rel="import" href="../paper-card/paper-card.html">
+<!--<link rel="import" href="../paper-search/paper-search-bar.html">-->
+
 
 <dom-module id="idecanarias-ol3">
-    <script src="//cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.3/proj4.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/ol3/3.3.0/ol.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.12/proj4.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/ol3/3.13.0/ol.min.js"></script>
     <template>
-        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/ol3/3.3.0/ol.css" type="text/css">
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/ol3/3.13.0/ol.min.css" type="text/css">
         <style>
             :host {
                 display: block;
@@ -48,7 +50,7 @@ Tutorials:
                 --paper-card-header-color: var(--paper-pink-500);
             }
             paper-button.fancy {
-              background: blue;
+              background: dodgerblue;
               color: white;
             }
 
@@ -56,11 +58,29 @@ Tutorials:
             paper-button[toggles][active] {
               background: red;
             }
+
+            paper-input {
+                position: absolute;
+                top: 5px;
+                left: 5px;
+                z-index: 40;
+            }
         </style>
 
-        <paper-material elevation="1">
-            <div id="map"></div>
-        </paper-material>
+        <div id="map">
+
+            <paper-material elevation="2">
+                <paper-input
+                    is="iron-input"
+                    id="btnSearch"
+                    type="search"
+                    on-change="search"
+                    label="Búsqueda" always-float-label
+                    autosave="test"
+                    results="5"></paper-input>
+            </paper-material>
+
+        </div>
 
         <iron-ajax
             id="ajax"
@@ -69,15 +89,9 @@ Tutorials:
             last-response="{{ xmldata }}">
         </iron-ajax>
 
-        <paper-input
-            is="iron-input"
-            id="btnSearch"
-            value="agua"
-            bind-value="{{ texto }}"></paper-input>
-        <paper-button on-click="doSearch" class="fancy">Buscar</paper-button>
-
-        <br/>
-
+        <!--<paper-search-bar id="btnSearch" placeholder="Introduzca término de búsqueda" nr-selected-filters="0" on-paper-search-search="search" on-paper-search-filter="filter"></paper-search-bar>-->
+        <!--<paper-button on-click="doSearch" class="fancy">Buscar</paper-button>-->
+        <!--
         <section class="flex layout vertical">
             <template is="dom-repeat" items="{{ nodeList(xmldata, 'row') }}">
                 <paper-card heading="{{ nodeText(item, 'nombre') }}" class="pink">
@@ -88,6 +102,7 @@ Tutorials:
                 </paper-card>
             </template>
         </section>
+        -->
 
         <paper-toast id="toast" text="Hello world!"></paper-toast>
 
@@ -104,10 +119,14 @@ Tutorials:
                 type: String,
                 value: 'Toponimos',
                 notify: true
+            },
+            map: {
+                type: Object
+            },
+            vector: {
+                type: Object
             }
         },
-
-        map: null,
 
         attached: function() {
             this.async(function() {
@@ -116,12 +135,11 @@ Tutorials:
         },
 
         ready: function() {
-            console.debug('ready');
         },
 
         doSearch: function() {
             var texto = this.$.btnSearch.value;
-            this.$.ajax.url = "http://visor.grafcan.es/busquedas/toponimoxml/1/10/";
+            this.$.ajax.url = "http://visor.grafcan.es/busquedas/toponimoxml/1/200/";
             this.$.ajax.params = {"texto": texto};
             if (texto) {
                 this.$.ajax.generateRequest();
@@ -130,19 +148,66 @@ Tutorials:
 
         initialConfig: function(){
             proj4.defs("EPSG:32628","+proj=utm +zone=28 +datum=WGS84 +units=m +no_defs");
+
+            this.vector = new ol.layer.Vector({
+                source: new ol.source.Vector(),
+                style: (function() {
+                    var style = new ol.style.Style({
+                        image: new ol.style.Icon({
+                            //scale: 0.08,
+                            //src: 'https://dl.dropboxusercontent.com/u/27798645/fireman/truck65.svg'
+                            src: 'http://visor.grafcan.es/resources/markers/01.png'
+                        }),
+                        /*image: new ol.style.Circle({
+                            fill: new ol.style.Fill({
+                                color: 'rgba(255,255,255,0.4)'
+                            }),
+                            stroke: new ol.style.Stroke({
+                                color: '#3399CC',
+                                width: 1.25
+                            }),
+                            radius: 5
+                        }),
+                        */
+                        text: new ol.style.Text({
+                            text: 'Hello',
+                            font: '8px Roboto, sans-serif',
+                            //scale: 1.3,
+                            /*
+                            fill: new ol.style.Fill({
+                                color: '#000000'
+                            }),*/
+                            stroke: new ol.style.Stroke({
+                                color: '#FFFF99',
+                                width: 3.5
+                            })
+                        })
+                    });
+                    var styles = [style];
+                    return function(feature, resolution) {
+                        style.getText().setText(feature.get("nam"));
+                      return styles;
+                    };
+                  })(),
+                params: {
+                    CUSTOM_ID: '1'
+                }
+            });
+
             this.map = new ol.Map({
                 target: this.$.map,
                 layers: [
                     new ol.layer.Tile({
                         source: new ol.source.TileWMS({
-                            url: "http://idecan3.grafcan.es/ServicioWMS/OrtoExpress?",
+                            url: "http://idecan3.grafcan.es/ServicioWMS/Callejero?",
                             params: {
-                                LAYERS: "ortoexpress",
-                                FORMAT: "image/jpeg",
+                                LAYERS: "WMS_CA",
+                                FORMAT: "image/png",
                                 VERSION: "1.1.0" },
                             serverType: 'mapserver'
                         })
-                    })
+                    }),
+                    this.vector
                 ],
                 view: new ol.View({
                     projection: 'EPSG:32628',
@@ -156,19 +221,57 @@ Tutorials:
                     resolution: 650
                 }),
                 controls: ol.control.defaults({
-                  attributionOptions: {
-                    collapsible: false
-                  }
+                  attribution: false,
+                  zoom: false
                 })
             });
+
+            this.map.on('pointermove', function(evt) {
+                displayFeatureInfo(evt.pixel);
+            });
+
         },
 
         handleResponse: function(data) {
-            var response = data.detail.response;
+            var i, x, y, nombre, response;
+
+            response = data.detail.response;
             list = response.querySelectorAll('row');
-            console.log(list);
-            this.$.toast.text = 'Consulta realizada';
+            console.log(list.length);
+
+            if (list.length > 0) {
+
+                this.vector.getSource().clear();
+
+                for (i = 0; i < list.length; i++) {
+                    x = this.nodeText(list[i], 'x');
+                    y = this.nodeText(list[i], 'y');
+                    nombre = this.nodeText(list[i], 'nombre');
+                    console.debug(x, y)
+
+                    var feature = new ol.Feature({
+                        name: nombre,
+                        geometry: new ol.geom.Point(
+                            ol.proj.transform([x, y], 'EPSG:4326', 'EPSG:32628')
+                        )
+                    });
+                    this.vector.getSource().addFeature(feature);
+                }
+                console.debug(this.vector.getSource().getExtent());
+                console.debug(this.map.getSize());
+                this.map.getView().fit(
+                    this.vector.getSource().getExtent(),
+                    this.map.getSize());
+            }
+
+            this.$.toast.text = 'Consulta realizada ' + list.length ;
             this.$.toast.open();
+        },
+
+        handleSearch: function(e) {
+            this.doSearch();
+            console.debug(e);
+
         },
 
         nodeList: function(element, name) {
@@ -177,6 +280,15 @@ Tutorials:
 
         nodeText: function(element, name) {
             return element.querySelector(name).textContent;
+        },
+
+        search: function() {
+            this.doSearch();
+
+        },
+
+        filter: function() {
+            alert("Filter dialog");
         }
 
     });
