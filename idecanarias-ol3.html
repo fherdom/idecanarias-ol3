@@ -10,6 +10,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 Author: Félix José Hernández @fherdom
 -->
 
+<link rel="import" href="../polymer/polymer.html">
+
 <!-- Iron elements -->
 <link rel="import" href="../iron-ajax/iron-ajax.html">
 
@@ -128,7 +130,8 @@ Author: Félix José Hernández @fherdom
                             params: {
                                 LAYERS: "WMS_CA",
                                 FORMAT: "image/png",
-                                VERSION: "1.1.0" },
+                                VERSION: "1.1.0"
+                            },
                             serverType: 'mapserver'
                         })
                     }),
