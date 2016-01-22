@@ -7,20 +7,15 @@ The complete set of contributors may be found at http://polymer.github.io/CONTRI
 Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 
-Tutorials:
-- 160121: https://www.youtube.com/watch?v=3LDyyTre4UA#t=163.837595
-
+Author: Félix José Hernández @fherdom
 -->
+
 <!-- Iron elements -->
 <link rel="import" href="../iron-ajax/iron-ajax.html">
 
 <!-- Paper elements -->
-<link rel="import" href="../paper-material/paper-material.html">
 <link rel="import" href="../paper-input/paper-input.html">
-<link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-toast/paper-toast.html">
-<link rel="import" href="../paper-card/paper-card.html">
-<!--<link rel="import" href="../paper-search/paper-search-bar.html">-->
 
 
 <dom-module id="idecanarias-ol3">
@@ -38,27 +33,6 @@ Tutorials:
                 height: 100%;
                 width: 100%;
             }
-            paper-card {
-                --paper-card-header: {
-                    @apply(--layout-vertical);
-                    @apply(--layout-center);
-                };
-                width: 250px;
-                margin-bottom: 16px;
-            }
-            .pink {
-                --paper-card-header-color: var(--paper-pink-500);
-            }
-            paper-button.fancy {
-              background: dodgerblue;
-              color: white;
-            }
-
-            paper-button[disabled],
-            paper-button[toggles][active] {
-              background: red;
-            }
-
             paper-input {
                 position: absolute;
                 top: 5px;
@@ -68,41 +42,22 @@ Tutorials:
         </style>
 
         <div id="map">
-
-            <paper-material elevation="2">
-                <paper-input
-                    is="iron-input"
-                    id="btnSearch"
-                    type="search"
-                    on-change="search"
-                    label="Búsqueda" always-float-label
-                    autosave="test"
-                    results="5"></paper-input>
-            </paper-material>
-
+            <paper-input
+                is="iron-input"
+                id="inputSearch"
+                type="search"
+                on-change="onSearch"
+                label="Búsqueda" always-float-label
+                autosave="test"
+                results="5"></paper-input>
         </div>
 
         <iron-ajax
             id="ajax"
             handle-as="xml"
-            on-response="handleResponse"
+            on-response="onResponse"
             last-response="{{ xmldata }}">
         </iron-ajax>
-
-        <!--<paper-search-bar id="btnSearch" placeholder="Introduzca término de búsqueda" nr-selected-filters="0" on-paper-search-search="search" on-paper-search-filter="filter"></paper-search-bar>-->
-        <!--<paper-button on-click="doSearch" class="fancy">Buscar</paper-button>-->
-        <!--
-        <section class="flex layout vertical">
-            <template is="dom-repeat" items="{{ nodeList(xmldata, 'row') }}">
-                <paper-card heading="{{ nodeText(item, 'nombre') }}" class="pink">
-                    <div class="card-content">{{ nodeText(item, 'localizacion') }}{{ nodeText(item, 'clasificacion') }}</div>
-                    <div class="card-actions">
-                        <paper-button>Ir</paper-button>
-                    </div>
-                </paper-card>
-            </template>
-        </section>
-        -->
 
         <paper-toast id="toast" text="Hello world!"></paper-toast>
 
@@ -130,15 +85,17 @@ Tutorials:
 
         attached: function() {
             this.async(function() {
-                this.initialConfig();
+                this.setupMap();
             });
         },
 
         ready: function() {
         },
 
-        doSearch: function() {
-            var texto = this.$.btnSearch.value;
+        onSearch: function() {
+            var texto;
+
+            texto = this.$.inputSearch.value;
             this.$.ajax.url = "http://visor.grafcan.es/busquedas/toponimoxml/1/200/";
             this.$.ajax.params = {"texto": texto};
             if (texto) {
@@ -146,54 +103,22 @@ Tutorials:
             }
         },
 
-        initialConfig: function(){
-            proj4.defs("EPSG:32628","+proj=utm +zone=28 +datum=WGS84 +units=m +no_defs");
+        setupMap: function(){
+            var self = this;
 
+            proj4.defs("EPSG:32628","+proj=utm +zone=28 +datum=WGS84 +units=m +no_defs");
             this.vector = new ol.layer.Vector({
                 source: new ol.source.Vector(),
-                style: (function() {
-                    var style = new ol.style.Style({
-                        image: new ol.style.Icon({
-                            //scale: 0.08,
-                            //src: 'https://dl.dropboxusercontent.com/u/27798645/fireman/truck65.svg'
-                            src: 'http://visor.grafcan.es/resources/markers/01.png'
-                        }),
-                        /*image: new ol.style.Circle({
-                            fill: new ol.style.Fill({
-                                color: 'rgba(255,255,255,0.4)'
-                            }),
-                            stroke: new ol.style.Stroke({
-                                color: '#3399CC',
-                                width: 1.25
-                            }),
-                            radius: 5
-                        }),
-                        */
-                        text: new ol.style.Text({
-                            text: 'Hello',
-                            font: '8px Roboto, sans-serif',
-                            //scale: 1.3,
-                            /*
-                            fill: new ol.style.Fill({
-                                color: '#000000'
-                            }),*/
-                            stroke: new ol.style.Stroke({
-                                color: '#FFFF99',
-                                width: 3.5
-                            })
-                        })
-                    });
-                    var styles = [style];
-                    return function(feature, resolution) {
-                        style.getText().setText(feature.get("nam"));
-                      return styles;
-                    };
-                  })(),
                 params: {
                     CUSTOM_ID: '1'
-                }
+                },
+                style: new ol.style.Style({
+                    image: new ol.style.Icon({
+                        scale: 1.00,
+                        src: 'http://visor.grafcan.es/resources/markers/01.png'
+                    }),
+                })
             });
-
             this.map = new ol.Map({
                 target: this.$.map,
                 layers: [
@@ -225,31 +150,34 @@ Tutorials:
                   zoom: false
                 })
             });
-
             this.map.on('pointermove', function(evt) {
-                displayFeatureInfo(evt.pixel);
-            });
+                var mouseCoordInMapPixels, feature;
 
+                mouseCoordInMapPixels = [evt.originalEvent.offsetX, evt.originalEvent.offsetY];
+                feature = self.map.forEachFeatureAtPixel(
+                    mouseCoordInMapPixels, function (feature, layer) {
+                        return feature;
+                });
+                if (feature) {
+                    self.$.toast.text = feature.get("name") ;
+                    self.$.toast.open();
+                }
+            });
         },
 
-        handleResponse: function(data) {
-            var i, x, y, nombre, response;
+        onResponse: function(data) {
+            var i, x, y, nombre, response, feature;
 
             response = data.detail.response;
             list = response.querySelectorAll('row');
             console.log(list.length);
-
             if (list.length > 0) {
-
                 this.vector.getSource().clear();
-
                 for (i = 0; i < list.length; i++) {
                     x = this.nodeText(list[i], 'x');
                     y = this.nodeText(list[i], 'y');
                     nombre = this.nodeText(list[i], 'nombre');
-                    console.debug(x, y)
-
-                    var feature = new ol.Feature({
+                    feature = new ol.Feature({
                         name: nombre,
                         geometry: new ol.geom.Point(
                             ol.proj.transform([x, y], 'EPSG:4326', 'EPSG:32628')
@@ -257,21 +185,12 @@ Tutorials:
                     });
                     this.vector.getSource().addFeature(feature);
                 }
-                console.debug(this.vector.getSource().getExtent());
-                console.debug(this.map.getSize());
                 this.map.getView().fit(
                     this.vector.getSource().getExtent(),
                     this.map.getSize());
             }
-
             this.$.toast.text = 'Consulta realizada ' + list.length ;
             this.$.toast.open();
-        },
-
-        handleSearch: function(e) {
-            this.doSearch();
-            console.debug(e);
-
         },
 
         nodeList: function(element, name) {
@@ -280,15 +199,6 @@ Tutorials:
 
         nodeText: function(element, name) {
             return element.querySelector(name).textContent;
-        },
-
-        search: function() {
-            this.doSearch();
-
-        },
-
-        filter: function() {
-            alert("Filter dialog");
         }
 
     });
