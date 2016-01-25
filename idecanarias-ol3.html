@@ -42,24 +42,23 @@ Author: Félix José Hernández @fherdom
                 z-index: 40;
             }
         </style>
+        <div id="map"></div>
+        <paper-input
+            is="iron-input"
+            id="inputSearch"
+            type="search"
+            on-change="onSearch"
+            label="Búsqueda" always-float-label
+            autosave="test"
+            results="5"></paper-input>
+        <iron-ajax
+            id="ajax"
+            handle-as="xml"
+            on-response="onResponse"
+            last-response="{{ xmldata }}">
+        </iron-ajax>
+        <paper-toast id="toast" text="Hello world!"></paper-toast>
 
-        <div id="map">
-            <paper-input
-                is="iron-input"
-                id="inputSearch"
-                type="search"
-                on-change="onSearch"
-                label="Búsqueda" always-float-label
-                autosave="test"
-                results="5"></paper-input>
-            <iron-ajax
-                id="ajax"
-                handle-as="xml"
-                on-response="onResponse"
-                last-response="{{ xmldata }}">
-            </iron-ajax>
-            <paper-toast id="toast" text="Hello world!"></paper-toast>
-        </div>
     </template>
 </dom-module>
 
