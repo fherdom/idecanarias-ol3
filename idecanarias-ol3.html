@@ -10,15 +10,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 Author: Félix José Hernández @fherdom
 -->
 
-<link rel="import" href="../polymer/polymer.html">
-
 <!-- Iron elements -->
 <link rel="import" href="../iron-ajax/iron-ajax.html">
 
 <!-- Paper elements -->
 <link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../paper-toast/paper-toast.html">
-
 
 <dom-module id="idecanarias-ol3">
     <script src="//cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.12/proj4.js"></script>
@@ -27,11 +24,14 @@ Author: Félix José Hernández @fherdom
         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/ol3/3.13.0/ol.min.css" type="text/css">
         <style>
             :host {
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
                 display: block;
-                position: relative;
                 font-family: 'Roboto', sans-serif;
             }
             #map {
+                position: absolute;
                 height: 100%;
                 width: 100%;
             }
@@ -52,17 +52,14 @@ Author: Félix José Hernández @fherdom
                 label="Búsqueda" always-float-label
                 autosave="test"
                 results="5"></paper-input>
+            <iron-ajax
+                id="ajax"
+                handle-as="xml"
+                on-response="onResponse"
+                last-response="{{ xmldata }}">
+            </iron-ajax>
+            <paper-toast id="toast" text="Hello world!"></paper-toast>
         </div>
-
-        <iron-ajax
-            id="ajax"
-            handle-as="xml"
-            on-response="onResponse"
-            last-response="{{ xmldata }}">
-        </iron-ajax>
-
-        <paper-toast id="toast" text="Hello world!"></paper-toast>
-
     </template>
 </dom-module>
 
@@ -153,30 +150,26 @@ Author: Félix José Hernández @fherdom
                   zoom: false
                 })
             });
-            this.map.on('pointermove', function(evt) {
-                var mouseCoordInMapPixels, feature;
-
-                mouseCoordInMapPixels = [evt.originalEvent.offsetX, evt.originalEvent.offsetY];
-                feature = self.map.forEachFeatureAtPixel(
-                    mouseCoordInMapPixels, function (feature, layer) {
-                        return feature;
-                });
-                if (feature) {
-                    self.$.toast.text = feature.get("name") ;
+            this.map.on('click', function(evt) {
+                var feature = self.map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+                    self.$.toast.text = feature.get("name");
                     self.$.toast.open();
-                }
+                    return feature;
+                }, null, function(layer) {
+                    return layer === self.vector;
+                });
             });
         },
 
         onResponse: function(data) {
-            var i, x, y, nombre, response, feature;
+            var x, y, nombre, response, feature;
 
             response = data.detail.response;
             list = response.querySelectorAll('row');
             console.log(list.length);
             if (list.length > 0) {
                 this.vector.getSource().clear();
-                for (i = 0; i < list.length; i++) {
+                for (var i = 0; i < list.length; i++) {
                     x = this.nodeText(list[i], 'x');
                     y = this.nodeText(list[i], 'y');
                     nombre = this.nodeText(list[i], 'nombre');
