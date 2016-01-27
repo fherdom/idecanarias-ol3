@@ -2,13 +2,13 @@
 <!---
 
 This README is automatically generated from the comments in these files:
-paper-input-addon-behavior.html  paper-input-behavior.html  paper-input-char-counter.html  paper-input-container.html  paper-input-error.html  paper-input.html  paper-textarea.html
+idecanarias-ol3.html
 
 Edit those files, and our readme bot will duplicate them over here!
 Edit this file, and the bot will squash your changes :)
 
 The bot does some handling of markdown. Please file a bug if it does the wrong
-thing! https://github.com/PolymerLabs/tedium/issues
+thing! https://github.com/fherdom/idecanarias-ol3/issues
 
 -->
 
