@@ -19,7 +19,7 @@ thing! https://github.com/fherdom/idecanarias-ol3/issues
 
 ##&lt;idecanarias-ol3&gt;
 
-Material design: [Text fields](https://www.google.com/design/spec/components/text-fields.html)
+<!--Material design: [Text fields](https://www.google.com/design/spec/components/text-fields.html)-->
 
 `<idecanarias-ol3>` is an openlayers 3 map viewer with Material Design styling.
 
