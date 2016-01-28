@@ -35,23 +35,19 @@ Author: Félix José Hernández @fherdom
             }
         </style>
         <div id="map"></div>
-
-        <!--<template is="dom-if" if="{{ showSearch }}">-->
         <paper-input
             is="iron-input"
             id="inputSearch"
             type="search"
             on-change="onSearch"
             label="Buscar" always-float-label
-            hidden$="{{ showSearch }}"></paper-input>
+            hidden$="{{ hideSearch }}"></paper-input>
         <iron-ajax
             id="ajax"
             handle-as="xml"
             on-response="onResponse">
         </iron-ajax>
         <paper-toast id="toast" text="..."></paper-toast>
-        <!--</template>-->
-
     </template>
 </dom-module>
 
@@ -72,11 +68,9 @@ Author: Félix José Hernández @fherdom
             vector: {
                 type: Object
             },
-            showSearch: {
-                type: Boolean,
-                value: true
+            hideSearch: {
+                type: Boolean
             }
-
         },
 
         attached: function() {

@@ -12,9 +12,9 @@ thing! https://github.com/fherdom/idecanarias-ol3/issues
 
 -->
 
-[![Build Status](https://travis-ci.org/PolymerElements/paper-input.svg?branch=master)](https://travis-ci.org/PolymerElements/paper-input)
+[![Build Status](https://travis-ci.org/fherdom/idecanarias-ol3.svg?branch=master)](https://travis-ci.org/fherdom/idecanarias-ol3)
 
-_[Demo and API Docs](https://elements.polymer-project.org/elements/paper-input)_
+<!--_[Demo and API Docs](https://elements.polymer-project.org/elements/paper-input)_-->
 
 
 ##&lt;idecanarias-ol3&gt;
@@ -32,14 +32,6 @@ Property `hide-search` hide input search box.
 
 ## Features
 
- * Supports touch devices and [modern](http://caniuse.com/#search=drag) browsers (including IE9)
- * Can drag from one list to another or within the same list
- * CSS animation when moving items
- * Supports drag handles *and selectable text* (better than voidberg's html5sortable)
- * Smart auto-scrolling
- * Built using native HTML5 drag and drop API
- * Supports [Meteor](meteor/README.md), [AngularJS](#ng), [React](#react) and [Polymer](#polymer)
- * Supports any CSS library, e.g. [Bootstrap](#bs)
- * Simple API
- * [CDN](#cdn)
- * No jQuery (but there is [support](#jq))
+ * Simple web component
+ * Search function
+
